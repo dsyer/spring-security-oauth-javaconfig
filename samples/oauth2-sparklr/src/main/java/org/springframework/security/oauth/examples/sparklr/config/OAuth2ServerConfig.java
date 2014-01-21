@@ -70,6 +70,9 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		
 		private TokenStore tokenStore = new InMemoryTokenStore();
 		
+		@Autowired
+		private OAuth2RequestFactory requestFactory;
+		
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 			
@@ -85,7 +88,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		@Bean
-		public SparklrUserApprovalHandler userApprovalHandler(OAuth2RequestFactory requestFactory) throws Exception {
+		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
 			handler.setRequestFactory(requestFactory);
@@ -117,7 +120,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 	            .requestMatchers()
                     .antMatchers("/oauth/token")
                     .and()
-	            .apply(new OAuth2AuthorizationServerConfigurer()).tokenStore(tokenStore);
+	            .apply(new OAuth2AuthorizationServerConfigurer()).tokenStore(tokenStore).userApprovalHandler(userApprovalHandler());
 	    	// @formatter:on
 		}
 

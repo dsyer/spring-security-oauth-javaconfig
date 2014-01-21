@@ -15,6 +15,7 @@ import org.springframework.security.oauth.examples.sparklr.mvc.AdminController;
 import org.springframework.security.oauth.examples.sparklr.mvc.PhotoController;
 import org.springframework.security.oauth.examples.sparklr.oauth.SparklrUserApprovalHandler;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.View;
@@ -66,9 +67,10 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public AccessConfirmationController accessConfirmationController(ClientDetailsService clientDetailsService) {
+    public AccessConfirmationController accessConfirmationController(ClientDetailsService clientDetailsService, ApprovalStore approvalStore) {
         AccessConfirmationController accessConfirmationController = new AccessConfirmationController();
         accessConfirmationController.setClientDetailsService(clientDetailsService);
+        accessConfirmationController.setApprovalStore(approvalStore);
         return accessConfirmationController;
     }
 

@@ -29,6 +29,8 @@ import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter;
 import org.springframework.security.oauth2.provider.client.ClientCredentialsTokenGranter;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
@@ -69,6 +71,7 @@ public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigure
     private TokenStore tokenStore;
     private TokenGranter tokenGranter;
 	private OAuth2RequestFactory requestFactory;
+	private UserApprovalHandler userApprovalHandler;
 
     private ClientDetailsService clientDetails() {
         return getBuilder().getSharedObject(ClientDetailsService.class);
@@ -85,9 +88,18 @@ public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigure
     public OAuth2RequestFactory getOAuth2RequestFactory() {
         return requestFactory;
     }
+    
+	public UserApprovalHandler getUserApprovalHandler() {
+		return userApprovalHandler;
+	}
 
     public OAuth2AuthorizationServerConfigurer tokenStore(TokenStore tokenStore) {
         this.tokenStore = tokenStore;
+        return this;
+    }
+
+    public OAuth2AuthorizationServerConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
+        this.userApprovalHandler = approvalHandler;
         return this;
     }
 
@@ -127,6 +139,7 @@ public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigure
 
         this.tokenGranter = tokenGranter(http);
 		this.consumerTokenServices = consumerTokenServices(http);
+		this.userApprovalHandler = userApprovalHandler();
 
         // @formatter:off
         http
@@ -168,6 +181,15 @@ public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigure
             this.tokenStore = new InMemoryTokenStore();
         }
         return this.tokenStore;
+    }
+
+    private UserApprovalHandler userApprovalHandler() {
+        if (userApprovalHandler == null) {
+            TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
+            userApprovalHandler.setTokenStore(tokenStore());
+            userApprovalHandler.setClientDetailsService(clientDetails());
+        }
+        return this.userApprovalHandler;
     }
 
     public AuthorizationCodeServices getAuthorizationCodeServices() {

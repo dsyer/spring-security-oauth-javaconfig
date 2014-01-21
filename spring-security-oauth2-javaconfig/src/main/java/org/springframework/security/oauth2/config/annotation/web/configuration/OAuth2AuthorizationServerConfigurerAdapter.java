@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.OAu
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
+import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
@@ -49,6 +50,7 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
         authorizationEndpoint.setTokenGranter(tokenGranter());
         authorizationEndpoint.setClientDetailsService(clientDetailsService());
         authorizationEndpoint.setAuthorizationCodeServices(authorizationCodeServices());
+        authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
         return authorizationEndpoint;
     }
 
@@ -88,6 +90,13 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
     @Scope(proxyMode=ScopedProxyMode.INTERFACES)
     public TokenStore tokenStore() throws Exception {
         return authorizationServerConfigurer().getTokenStore();
+    }
+
+    @Bean
+    @Lazy
+    @Scope(proxyMode=ScopedProxyMode.INTERFACES)
+    public UserApprovalHandler userApprovalHandler() throws Exception {
+        return authorizationServerConfigurer().getUserApprovalHandler();
     }
 
     protected AuthorizationServerTokenServices tokenServices() throws Exception {
