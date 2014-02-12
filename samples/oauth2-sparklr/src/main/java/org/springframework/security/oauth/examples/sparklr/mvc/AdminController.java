@@ -111,5 +111,12 @@ public class AdminController {
 	public void setTokenServices(ConsumerTokenServices tokenServices) {
 		this.tokenServices = tokenServices;
 	}
+	
+	/**
+	 * @param tokenStore the tokenStore to set
+	 */
+	public void setTokenStore(TokenStore tokenStore) {
+		this.tokenStore = tokenStore;
+	}
 
 }

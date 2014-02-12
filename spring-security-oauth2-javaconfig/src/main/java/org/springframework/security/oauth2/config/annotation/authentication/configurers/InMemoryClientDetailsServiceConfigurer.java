@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.BaseClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -34,116 +35,127 @@ import org.springframework.security.oauth2.provider.client.ClientDetailsUserDeta
 
 /**
  * @author Rob Winch
- *
+ * 
  */
-public class InMemoryClientDetailsServiceConfigurer extends SecurityConfigurerAdapter<AuthenticationManager,AuthenticationManagerBuilder>{
-    private List<ClientBuilder> clientBuilders = new ArrayList<ClientBuilder>();
+public class InMemoryClientDetailsServiceConfigurer extends
+		SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
+	private List<ClientBuilder> clientBuilders = new ArrayList<ClientBuilder>();
 
-    public ClientBuilder withClient(String clientId) {
-        ClientBuilder clientBuilder = new ClientBuilder(clientId);
-        this.clientBuilders.add(clientBuilder);
-        return clientBuilder;
-    }
+	public ClientBuilder withClient(String clientId) {
+		ClientBuilder clientBuilder = new ClientBuilder(clientId);
+		this.clientBuilders.add(clientBuilder);
+		return clientBuilder;
+	}
 
-    @Override
-    public void init(AuthenticationManagerBuilder builder) throws Exception {
-        Map<String,ClientDetails> clientDetails = new HashMap<String,ClientDetails>(clientBuilders.size());
-        for(ClientBuilder clientDetailsBldr : clientBuilders) {
-            clientDetails.put(clientDetailsBldr.clientId, clientDetailsBldr.build());
-        }
-        InMemoryClientDetailsService clientDetailsService = new InMemoryClientDetailsService();
-        clientDetailsService.setClientDetailsStore(clientDetails);
+	@Override
+	public void init(AuthenticationManagerBuilder builder) throws Exception {
+		Map<String, ClientDetails> clientDetails = new HashMap<String, ClientDetails>(clientBuilders.size());
+		for (ClientBuilder clientDetailsBldr : clientBuilders) {
+			clientDetails.put(clientDetailsBldr.clientId, clientDetailsBldr.build());
+		}
+		InMemoryClientDetailsService clientDetailsService = new InMemoryClientDetailsService();
+		clientDetailsService.setClientDetailsStore(clientDetails);
 
-        ClientDetailsUserDetailsService userDetailsService = new ClientDetailsUserDetailsService(clientDetailsService);
-        builder.userDetailsService(userDetailsService);
+		ClientDetailsUserDetailsService userDetailsService = new ClientDetailsUserDetailsService(clientDetailsService);
+		builder.userDetailsService(userDetailsService);
 
-        builder.setSharedObject(ClientDetailsService.class, clientDetailsService);
-    }
+		builder.setSharedObject(ClientDetailsService.class, clientDetailsService);
+	}
 
-    @Override
-    public void configure(AuthenticationManagerBuilder builder) throws Exception {
+	@Override
+	public void configure(AuthenticationManagerBuilder builder) throws Exception {
 
-    }
+	}
 
-    public final class ClientBuilder {
-        private final String clientId;
-        private Collection<String> authorizedGrantTypes = new ArrayList<String>();
-        private Collection<String> authorities = new ArrayList<String>();
-        private Integer accessTokenValiditySeconds;
-        private Integer refreshTokenValiditySeconds;
-        private Collection<String> scopes = new ArrayList<String>();
-        private String secret;
-        private Set<String> registeredRedirectUris = new HashSet<String>();
-        private Set<String> resourceIds = new HashSet<String>();
+	public final class ClientBuilder {
+		private final String clientId;
 
-        private ClientDetails build() {
-            BaseClientDetails result = new BaseClientDetails();
-            result.setClientId(clientId);
-            result.setAuthorizedGrantTypes(authorizedGrantTypes);
-            result.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
-            result.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
-            result.setRegisteredRedirectUri(registeredRedirectUris);
-            result.setClientSecret(secret);
-            return result;
-        }
+		private Collection<String> authorizedGrantTypes = new ArrayList<String>();
 
-        public ClientBuilder resourceIds(String... resourceIds) {
-            for(String resourceId : resourceIds) {
-                this.resourceIds.add(resourceId);
-            }
-            return this;
-        }
+		private Collection<String> authorities = new ArrayList<String>();
 
-        public ClientBuilder redirectUris(String... registeredRedirectUris) {
-            for(String redirectUri : registeredRedirectUris) {
-                this.registeredRedirectUris.add(redirectUri);
-            }
-            return this;
-        }
+		private Integer accessTokenValiditySeconds;
 
-        public ClientBuilder authorizedGrantTypes(String... authorizedGrantTypes) {
-            for(String grant : authorizedGrantTypes) {
-                this.authorizedGrantTypes.add(grant);
-            }
-            return this;
-        }
+		private Integer refreshTokenValiditySeconds;
 
-        public ClientBuilder accessTokenValiditySeconds(int accessTokenValiditySeconds) {
-            this.accessTokenValiditySeconds = accessTokenValiditySeconds;
-            return this;
-        }
+		private Collection<String> scopes = new ArrayList<String>();
 
-        public ClientBuilder refreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
-            this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
-            return this;
-        }
+		private String secret;
 
-        public ClientBuilder secret(String secret) {
-            this.secret = secret;
-            return this;
-        }
+		private Set<String> registeredRedirectUris = new HashSet<String>();
 
-        public ClientBuilder scopes(String... scopes) {
-            for(String scope : scopes) {
-                this.scopes.add(scope);
-            }
-            return this;
-        }
+		private Set<String> resourceIds = new HashSet<String>();
 
-        public ClientBuilder authorities(String... authorities) {
-            for(String authority : authorities) {
-                this.authorities.add(authority);
-            }
-            return this;
-        }
+		private ClientDetails build() {
+			BaseClientDetails result = new BaseClientDetails();
+			result.setClientId(clientId);
+			result.setAuthorizedGrantTypes(authorizedGrantTypes);
+			result.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
+			result.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
+			result.setRegisteredRedirectUri(registeredRedirectUris);
+			result.setClientSecret(secret);
+			result.setScope(scopes);
+			result.setAuthorities(AuthorityUtils.createAuthorityList(authorities.toArray(new String[authorities.size()])));
+			result.setResourceIds(resourceIds);
+			return result;
+		}
 
-        public InMemoryClientDetailsServiceConfigurer and() {
-            return InMemoryClientDetailsServiceConfigurer.this;
-        }
+		public ClientBuilder resourceIds(String... resourceIds) {
+			for (String resourceId : resourceIds) {
+				this.resourceIds.add(resourceId);
+			}
+			return this;
+		}
 
+		public ClientBuilder redirectUris(String... registeredRedirectUris) {
+			for (String redirectUri : registeredRedirectUris) {
+				this.registeredRedirectUris.add(redirectUri);
+			}
+			return this;
+		}
 
-        private ClientBuilder(String clientId) {
-            this.clientId = clientId;
-        }
-    }
+		public ClientBuilder authorizedGrantTypes(String... authorizedGrantTypes) {
+			for (String grant : authorizedGrantTypes) {
+				this.authorizedGrantTypes.add(grant);
+			}
+			return this;
+		}
+
+		public ClientBuilder accessTokenValiditySeconds(int accessTokenValiditySeconds) {
+			this.accessTokenValiditySeconds = accessTokenValiditySeconds;
+			return this;
+		}
+
+		public ClientBuilder refreshTokenValiditySeconds(int refreshTokenValiditySeconds) {
+			this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
+			return this;
+		}
+
+		public ClientBuilder secret(String secret) {
+			this.secret = secret;
+			return this;
+		}
+
+		public ClientBuilder scopes(String... scopes) {
+			for (String scope : scopes) {
+				this.scopes.add(scope);
+			}
+			return this;
+		}
+
+		public ClientBuilder authorities(String... authorities) {
+			for (String authority : authorities) {
+				this.authorities.add(authority);
+			}
+			return this;
+		}
+
+		public InMemoryClientDetailsServiceConfigurer and() {
+			return InMemoryClientDetailsServiceConfigurer.this;
+		}
+
+		private ClientBuilder(String clientId) {
+			this.clientId = clientId;
+		}
+	}
 }

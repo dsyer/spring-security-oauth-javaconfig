@@ -58,14 +58,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         return photoController;
     }
 
-    // @Bean
-    public AdminController adminController(ConsumerTokenServices tokenServices, SparklrUserApprovalHandler userApprovalHandler) {
-        AdminController adminController = new AdminController();
-        adminController.setTokenServices(tokenServices);
-        adminController.setUserApprovalHandler(userApprovalHandler);
-        return adminController;
-    }
-
     @Bean
     public AccessConfirmationController accessConfirmationController(ClientDetailsService clientDetailsService, ApprovalStore approvalStore) {
         AccessConfirmationController accessConfirmationController = new AccessConfirmationController();

@@ -74,13 +74,6 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
     @Bean
     @Lazy
     @Scope(proxyMode=ScopedProxyMode.INTERFACES)
-    public AuthorizationCodeTokenGranter authorizationTokenGranter() throws Exception {
-        return new AuthorizationCodeTokenGranter(tokenServices(), authorizationCodeServices(), clientDetailsService(), oauth2RequestFactory());
-    }
-
-    @Bean
-    @Lazy
-    @Scope(proxyMode=ScopedProxyMode.INTERFACES)
     public OAuth2RequestFactory oauth2RequestFactory() throws Exception {
         return authorizationServerConfigurer().getOAuth2RequestFactory();
     }
@@ -93,8 +86,8 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
     }
 
     @Bean
-    @Lazy
-    @Scope(proxyMode=ScopedProxyMode.INTERFACES)
+	@Lazy
+	@Scope(proxyMode=ScopedProxyMode.INTERFACES)
     public UserApprovalHandler userApprovalHandler() throws Exception {
         return authorizationServerConfigurer().getUserApprovalHandler();
     }

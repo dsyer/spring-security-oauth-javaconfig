@@ -56,99 +56,116 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 
 /**
- *
+ * 
  * @author Rob Winch
  * @since 3.2
  */
-public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
-    private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
-    private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
+public final class OAuth2AuthorizationServerConfigurer extends
+		SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
-    private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter;
-    private AuthorizationServerTokenServices tokenServices;
-    private ConsumerTokenServices consumerTokenServices;
-    private AuthorizationCodeServices authorizationCodeServices;
-    private TokenStore tokenStore;
-    private TokenGranter tokenGranter;
+	private AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+
+	private AccessDeniedHandler accessDeniedHandler = new OAuth2AccessDeniedHandler();
+
+	private ClientCredentialsTokenEndpointFilter clientCredentialsTokenEndpointFilter;
+
+	private AuthorizationServerTokenServices tokenServices;
+
+	private ConsumerTokenServices consumerTokenServices;
+
+	private AuthorizationCodeServices authorizationCodeServices;
+
+	private TokenStore tokenStore;
+
+	private TokenGranter tokenGranter;
+
 	private OAuth2RequestFactory requestFactory;
+
 	private UserApprovalHandler userApprovalHandler;
 
-    private ClientDetailsService clientDetails() {
-        return getBuilder().getSharedObject(ClientDetailsService.class);
-    }
+	private AuthenticationManager authenticationManager;
 
-    public AuthorizationServerTokenServices getTokenServices() {
-        return tokenServices;
-    }
+	private ClientDetailsService clientDetails() {
+		return getBuilder().getSharedObject(ClientDetailsService.class);
+	}
 
-    public TokenStore getTokenStore() {
-        return tokenStore;
-    }
+	public AuthorizationServerTokenServices getTokenServices() {
+		return tokenServices;
+	}
 
-    public OAuth2RequestFactory getOAuth2RequestFactory() {
-        return requestFactory;
-    }
-    
+	public TokenStore getTokenStore() {
+		return tokenStore;
+	}
+
+	public OAuth2RequestFactory getOAuth2RequestFactory() {
+		return requestFactory;
+	}
+
 	public UserApprovalHandler getUserApprovalHandler() {
 		return userApprovalHandler;
 	}
 
-    public OAuth2AuthorizationServerConfigurer tokenStore(TokenStore tokenStore) {
-        this.tokenStore = tokenStore;
-        return this;
-    }
+	public OAuth2AuthorizationServerConfigurer tokenStore(TokenStore tokenStore) {
+		this.tokenStore = tokenStore;
+		return this;
+	}
 
-    public OAuth2AuthorizationServerConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
-        this.userApprovalHandler = approvalHandler;
-        return this;
-    }
+	public OAuth2AuthorizationServerConfigurer userApprovalHandler(UserApprovalHandler approvalHandler) {
+		this.userApprovalHandler = approvalHandler;
+		return this;
+	}
 
-    @Override
-    public void init(HttpSecurity http) throws Exception {
-        registerDefaultAuthenticationEntryPoint(http);
-        http
-            .securityContext()
-                .securityContextRepository(new NullSecurityContextRepository())
-                .and()
-            .csrf().disable()
-            .httpBasic();
-    }
+	public OAuth2AuthorizationServerConfigurer authenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+		return this;
+	}
 
-    @SuppressWarnings("unchecked")
-    private void registerDefaultAuthenticationEntryPoint(HttpSecurity http) {
-        ExceptionHandlingConfigurer<HttpSecurity> exceptionHandling = http.getConfigurer(ExceptionHandlingConfigurer.class);
-        if(exceptionHandling == null) {
-            return;
-        }
-        ContentNegotiationStrategy contentNegotiationStrategy = http.getSharedObject(ContentNegotiationStrategy.class);
-        if(contentNegotiationStrategy == null) {
-            contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
-        }
-        MediaTypeRequestMatcher preferredMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_FORM_URLENCODED,  MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_XML, MediaType.MULTIPART_FORM_DATA, MediaType.TEXT_XML);
-        preferredMatcher.setIgnoredMediaTypes(Collections.singleton(MediaType.ALL));
-        exceptionHandling.defaultAuthenticationEntryPointFor(postProcess(authenticationEntryPoint), preferredMatcher);
-    }
+	@Override
+	public void init(HttpSecurity http) throws Exception {
+		registerDefaultAuthenticationEntryPoint(http);
+		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
+				.httpBasic();
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void configure(HttpSecurity http) throws Exception {
-        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter();
-        clientCredentialsTokenEndpointFilter.setAuthenticationManager(authenticationManager);
-        clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
+	@SuppressWarnings("unchecked")
+	private void registerDefaultAuthenticationEntryPoint(HttpSecurity http) {
+		ExceptionHandlingConfigurer<HttpSecurity> exceptionHandling = http
+				.getConfigurer(ExceptionHandlingConfigurer.class);
+		if (exceptionHandling == null) {
+			return;
+		}
+		ContentNegotiationStrategy contentNegotiationStrategy = http.getSharedObject(ContentNegotiationStrategy.class);
+		if (contentNegotiationStrategy == null) {
+			contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
+		}
+		MediaTypeRequestMatcher preferredMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
+				MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON,
+				MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_XML, MediaType.MULTIPART_FORM_DATA,
+				MediaType.TEXT_XML);
+		preferredMatcher.setIgnoredMediaTypes(Collections.singleton(MediaType.ALL));
+		exceptionHandling.defaultAuthenticationEntryPointFor(postProcess(authenticationEntryPoint), preferredMatcher);
+	}
 
-        this.tokenGranter = tokenGranter(http);
+	@Override
+	@SuppressWarnings("unchecked")
+	public void configure(HttpSecurity http) throws Exception {
+		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		clientCredentialsTokenEndpointFilter = new ClientCredentialsTokenEndpointFilter();
+		clientCredentialsTokenEndpointFilter.setAuthenticationManager(authenticationManager);
+		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
+
+		this.tokenGranter = tokenGranter(http);
 		this.consumerTokenServices = consumerTokenServices(http);
 		this.userApprovalHandler = userApprovalHandler();
 
-        // @formatter:off
+		// @formatter:off
         http
             .addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class)
             .getConfigurer(ExceptionHandlingConfigurer.class)
                 .accessDeniedHandler(accessDeniedHandler);
         // @formatter:on
 
-    }
+	}
 
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices;
@@ -164,83 +181,76 @@ public final class OAuth2AuthorizationServerConfigurer extends SecurityConfigure
 		return consumerTokenServices;
 	}
 
-    private AuthorizationServerTokenServices tokenServices(HttpSecurity http) {
-        if (tokenServices != null) {
-            return tokenServices;
-        }
-        DefaultTokenServices tokenServices = new DefaultTokenServices();
-        tokenServices.setTokenStore(tokenStore());
-        tokenServices.setSupportRefreshToken(true);
-        tokenServices.setClientDetailsService(clientDetails());
-        this.tokenServices = tokenServices;
-        return tokenServices;
-    }
+	private AuthorizationServerTokenServices tokenServices(HttpSecurity http) {
+		if (tokenServices != null) {
+			return tokenServices;
+		}
+		DefaultTokenServices tokenServices = new DefaultTokenServices();
+		tokenServices.setTokenStore(tokenStore());
+		tokenServices.setSupportRefreshToken(true);
+		tokenServices.setClientDetailsService(clientDetails());
+		this.tokenServices = tokenServices;
+		return tokenServices;
+	}
 
-    private TokenStore tokenStore() {
-        if (tokenStore == null) {
-            this.tokenStore = new InMemoryTokenStore();
-        }
-        return this.tokenStore;
-    }
+	private TokenStore tokenStore() {
+		if (tokenStore == null) {
+			this.tokenStore = new InMemoryTokenStore();
+		}
+		return this.tokenStore;
+	}
 
-    private UserApprovalHandler userApprovalHandler() {
-        if (userApprovalHandler == null) {
-            TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
-            userApprovalHandler.setTokenStore(tokenStore());
-            userApprovalHandler.setClientDetailsService(clientDetails());
-        }
-        return this.userApprovalHandler;
-    }
+	private UserApprovalHandler userApprovalHandler() {
+		if (userApprovalHandler == null) {
+			TokenStoreUserApprovalHandler userApprovalHandler = new TokenStoreUserApprovalHandler();
+			userApprovalHandler.setTokenStore(tokenStore());
+			userApprovalHandler.setClientDetailsService(clientDetails());
+		}
+		return this.userApprovalHandler;
+	}
 
-    public AuthorizationCodeServices getAuthorizationCodeServices() {
-        return authorizationCodeServices;
-    }
+	public AuthorizationCodeServices getAuthorizationCodeServices() {
+		return authorizationCodeServices;
+	}
 
-    private AuthorizationCodeServices authorizationCodeServices(
-            HttpSecurity http) {
-        if (authorizationCodeServices == null) {
-            authorizationCodeServices = new InMemoryAuthorizationCodeServices();
-        }
-        return authorizationCodeServices;
-    }
+	private AuthorizationCodeServices authorizationCodeServices(HttpSecurity http) {
+		if (authorizationCodeServices == null) {
+			authorizationCodeServices = new InMemoryAuthorizationCodeServices();
+		}
+		return authorizationCodeServices;
+	}
 
-    private AuthenticationManager authenticationManager(HttpSecurity http) {
-        return http.getSharedObject(AuthenticationManager.class);
-    }
-    
-    private OAuth2RequestFactory requestFactory(HttpSecurity http) {
-        if (requestFactory != null) {
-            return requestFactory;
-        }
-        requestFactory = new DefaultOAuth2RequestFactory(clientDetails());
-        return requestFactory;
-    }
+	private OAuth2RequestFactory requestFactory(HttpSecurity http) {
+		if (requestFactory != null) {
+			return requestFactory;
+		}
+		requestFactory = new DefaultOAuth2RequestFactory(clientDetails());
+		return requestFactory;
+	}
 
-    public TokenGranter getTokenGranter() {
-        return tokenGranter;
-    }
+	public TokenGranter getTokenGranter() {
+		return tokenGranter;
+	}
 
-    private TokenGranter tokenGranter(HttpSecurity http) throws Exception {
-        if(tokenGranter == null) {
-            ClientDetailsService clientDetails = clientDetails();
-            AuthorizationServerTokenServices tokenServices = tokenServices(http);
-            AuthorizationCodeServices authorizationCodeServices = authorizationCodeServices(http);
-            AuthenticationManager authenticationManager = authenticationManager(http);
-            OAuth2RequestFactory requestFactory = requestFactory(http);
+	private TokenGranter tokenGranter(HttpSecurity http) throws Exception {
+		if (tokenGranter == null) {
+			ClientDetailsService clientDetails = clientDetails();
+			AuthorizationServerTokenServices tokenServices = tokenServices(http);
+			AuthorizationCodeServices authorizationCodeServices = authorizationCodeServices(http);
+			OAuth2RequestFactory requestFactory = requestFactory(http);
 
-            List<TokenGranter> tokenGranters = new ArrayList<TokenGranter>();
-            tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices,
-                    authorizationCodeServices, clientDetails, requestFactory));
-            tokenGranters
-                    .add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
-            tokenGranters
-                    .add(new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory));
-            tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices,
-                    clientDetails, requestFactory));
-            tokenGranters.add(new ResourceOwnerPasswordTokenGranter(
-                    authenticationManager, tokenServices, clientDetails, requestFactory));
-            tokenGranter = new CompositeTokenGranter(tokenGranters);
-        }
-        return tokenGranter;
-    }
+			List<TokenGranter> tokenGranters = new ArrayList<TokenGranter>();
+			tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,
+					clientDetails, requestFactory));
+			tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
+			tokenGranters.add(new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory));
+			tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
+			if (authenticationManager != null) {
+				tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
+						clientDetails, requestFactory));
+			}
+			tokenGranter = new CompositeTokenGranter(tokenGranters);
+		}
+		return tokenGranter;
+	}
 }
