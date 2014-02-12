@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.OAu
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
+import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
@@ -88,7 +89,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		@Bean
-		public SparklrUserApprovalHandler userApprovalHandler() throws Exception {
+		public UserApprovalHandler userApprovalHandler() throws Exception {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
 			handler.setRequestFactory(requestFactory);
