@@ -66,8 +66,7 @@
 							name="${scope.key}" value="false" ${denied}>Deny</input></li>
 					</c:forEach>
 				</ul>
-				<label><input name="authorize" value="Submit" type="submit"></label> <input type="hidden" name="${_csrf.parameterName}"
-					value="${_csrf.token}" />
+				<label><input name="authorize" value="Submit" type="submit"></label>
 			</form>
 
 		</authz:authorize>

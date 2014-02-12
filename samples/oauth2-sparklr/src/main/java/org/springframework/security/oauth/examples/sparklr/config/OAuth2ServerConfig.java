@@ -131,11 +131,16 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 	 			        .authorities("ROLE_CLIENT")
 	 			        .scopes("read", "trust")
 	 			        .redirectUris("http://anywhere?key=value")
-		 		.and()
+		 		    .and()
 	 		        .withClient("my-trusted-client")
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
  			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
- 			            .scopes("read", "write", "trust");
+ 			            .scopes("read", "write", "trust")
+	 		        .and()
+ 		            .withClient("my-less-trusted-client")
+			            .authorizedGrantTypes("authorization_code", "implicit")
+			            .authorities("ROLE_CLIENT")
+			            .scopes("read", "write", "trust");
 			// @formatter:on
 		}
 
