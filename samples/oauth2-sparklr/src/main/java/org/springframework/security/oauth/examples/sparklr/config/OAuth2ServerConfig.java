@@ -97,7 +97,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
             .requestMatchers()
                 .antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**")
                 .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 .and()
             .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
                 .and()
