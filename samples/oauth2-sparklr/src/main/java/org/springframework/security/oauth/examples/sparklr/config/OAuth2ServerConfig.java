@@ -147,6 +147,12 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
  			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
  			            .scopes("read", "write", "trust")
+		 		    .and()
+	 		        .withClient("my-trusted-client-with-secret")
+ 			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+ 			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
+ 			            .scopes("read", "write", "trust")
+ 			            .secret("somesecret")
 	 		        .and()
  		            .withClient("my-less-trusted-client")
 			            .authorizedGrantTypes("authorization_code", "implicit")
@@ -194,7 +200,8 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 	            .apply(new OAuth2AuthorizationServerConfigurer())
 	                .tokenStore(tokenStore)
 	                .userApprovalHandler(userApprovalHandler())
-	                .authenticationManager(authenticationManager);
+	                .authenticationManager(authenticationManager)
+	                .realm("sparklr2/client");
 	    	// @formatter:on
 		}
 

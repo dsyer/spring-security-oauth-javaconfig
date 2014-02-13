@@ -89,6 +89,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 
 	private AuthenticationManager authenticationManager;
 
+	private String realm = "oauth2/client";
+
 	private ClientDetailsService clientDetails() {
 		return getBuilder().getSharedObject(ClientDetailsService.class);
 	}
@@ -119,6 +121,16 @@ public final class OAuth2AuthorizationServerConfigurer extends
 		return this;
 	}
 
+	public OAuth2AuthorizationServerConfigurer realm(String realm) {
+		this.realm  = realm;
+		return this;
+	}
+
+	public OAuth2AuthorizationServerConfigurer authenticationEntryPoint(AuthenticationEntryPoint authenticationEntryPoint) {
+		this.authenticationEntryPoint = authenticationEntryPoint;
+		return this;
+	}
+
 	public OAuth2AuthorizationServerConfigurer authenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 		return this;
@@ -128,7 +140,7 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public void init(HttpSecurity http) throws Exception {
 		registerDefaultAuthenticationEntryPoint(http);
 		http.securityContext().securityContextRepository(new NullSecurityContextRepository()).and().csrf().disable()
-				.httpBasic();
+				.httpBasic().realmName(realm);
 	}
 
 	@SuppressWarnings("unchecked")
