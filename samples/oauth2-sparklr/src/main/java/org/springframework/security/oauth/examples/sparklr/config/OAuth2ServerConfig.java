@@ -37,6 +37,7 @@ import org.springframework.security.oauth2.config.annotation.authentication.conf
 import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.OAuth2ResourceServerConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
@@ -113,6 +114,9 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		@Qualifier("authenticationManagerBean")
 		private AuthenticationManager authenticationManager;
 
+		@Autowired
+		private ClientDetailsService clientDetailsService;
+
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
@@ -140,7 +144,13 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
  		            .withClient("my-less-trusted-client")
 			            .authorizedGrantTypes("authorization_code", "implicit")
 			            .authorities("ROLE_CLIENT")
-			            .scopes("read", "write", "trust");
+			            .scopes("read", "write", "trust")
+     		        .and()
+		            .withClient("my-less-trusted-autoapprove-client")
+		                .authorizedGrantTypes("implicit")
+		                .authorities("ROLE_CLIENT")
+		                .scopes("read", "write", "trust")
+		                .autoApprove(true);
 			// @formatter:on
 		}
 
@@ -152,6 +162,8 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 			SparklrUserApprovalHandler handler = new SparklrUserApprovalHandler();
 			handler.setApprovalStore(approvalStore());
 			handler.setRequestFactory(requestFactory);
+			handler.setClientDetailsService(clientDetailsService);
+			handler.setUseApprovalStore(true);
 			return handler;
 		}
 

@@ -27,7 +27,6 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenGranter;
 import org.springframework.security.oauth2.provider.approval.UserApprovalHandler;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
@@ -51,6 +50,7 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
         authorizationEndpoint.setClientDetailsService(clientDetailsService());
         authorizationEndpoint.setAuthorizationCodeServices(authorizationCodeServices());
         authorizationEndpoint.setUserApprovalHandler(userApprovalHandler());
+        authorizationEndpoint.setImplicitGrantService(authorizationServerConfigurer().getImplicitGrantService());
         return authorizationEndpoint;
     }
 

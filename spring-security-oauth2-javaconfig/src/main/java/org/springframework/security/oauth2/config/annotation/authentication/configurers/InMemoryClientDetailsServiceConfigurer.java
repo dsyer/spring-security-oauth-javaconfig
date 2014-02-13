@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,21 +71,25 @@ public class InMemoryClientDetailsServiceConfigurer extends
 	public final class ClientBuilder {
 		private final String clientId;
 
-		private Collection<String> authorizedGrantTypes = new ArrayList<String>();
+		private Collection<String> authorizedGrantTypes = new LinkedHashSet<String>();
 
-		private Collection<String> authorities = new ArrayList<String>();
+		private Collection<String> authorities = new LinkedHashSet<String>();
 
 		private Integer accessTokenValiditySeconds;
 
 		private Integer refreshTokenValiditySeconds;
 
-		private Collection<String> scopes = new ArrayList<String>();
+		private Collection<String> scopes = new LinkedHashSet<String>();
+
+		private Collection<String> autoApproveScopes = new HashSet<String>();
 
 		private String secret;
 
 		private Set<String> registeredRedirectUris = new HashSet<String>();
 
 		private Set<String> resourceIds = new HashSet<String>();
+
+		private boolean autoApprove;
 
 		private ClientDetails build() {
 			BaseClientDetails result = new BaseClientDetails();
@@ -97,6 +102,9 @@ public class InMemoryClientDetailsServiceConfigurer extends
 			result.setScope(scopes);
 			result.setAuthorities(AuthorityUtils.createAuthorityList(authorities.toArray(new String[authorities.size()])));
 			result.setResourceIds(resourceIds);
+			if (autoApprove) {
+				result.setAutoApproveScopes(scopes);
+			}
 			return result;
 		}
 
@@ -150,6 +158,18 @@ public class InMemoryClientDetailsServiceConfigurer extends
 			return this;
 		}
 
+		public ClientBuilder autoApprove(boolean autoApprove) {
+			this.autoApprove = autoApprove;
+			return this;
+		}
+
+		public ClientBuilder autoApprove(String... scopes) {
+			for (String scope : scopes) {
+				this.autoApproveScopes.add(scope);
+			}
+			return this;
+		}
+
 		public InMemoryClientDetailsServiceConfigurer and() {
 			return InMemoryClientDetailsServiceConfigurer.this;
 		}
@@ -157,5 +177,6 @@ public class InMemoryClientDetailsServiceConfigurer extends
 		private ClientBuilder(String clientId) {
 			this.clientId = clientId;
 		}
+
 	}
 }

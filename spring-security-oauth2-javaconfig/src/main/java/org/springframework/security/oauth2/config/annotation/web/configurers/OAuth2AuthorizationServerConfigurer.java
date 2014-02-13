@@ -38,7 +38,9 @@ import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenG
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.oauth2.provider.implicit.ImplicitGrantService;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
+import org.springframework.security.oauth2.provider.implicit.InMemoryImplicitGrantService;
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -74,6 +76,8 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	private ConsumerTokenServices consumerTokenServices;
 
 	private AuthorizationCodeServices authorizationCodeServices;
+
+	private ImplicitGrantService implicitGrantService = new InMemoryImplicitGrantService();
 
 	private TokenStore tokenStore;
 
@@ -170,6 +174,10 @@ public final class OAuth2AuthorizationServerConfigurer extends
 	public ConsumerTokenServices getConsumerTokenServices() {
 		return consumerTokenServices;
 	}
+	
+	public ImplicitGrantService getImplicitGrantService() {
+		return implicitGrantService;
+	}
 
 	private ConsumerTokenServices consumerTokenServices(HttpSecurity http) {
 		if (consumerTokenServices == null) {
@@ -243,7 +251,9 @@ public final class OAuth2AuthorizationServerConfigurer extends
 			tokenGranters.add(new AuthorizationCodeTokenGranter(tokenServices, authorizationCodeServices,
 					clientDetails, requestFactory));
 			tokenGranters.add(new RefreshTokenGranter(tokenServices, clientDetails, requestFactory));
-			tokenGranters.add(new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory));
+			ImplicitTokenGranter implicit = new ImplicitTokenGranter(tokenServices, clientDetails, requestFactory);
+			implicit.setImplicitGrantService(implicitGrantService);
+			tokenGranters.add(implicit);
 			tokenGranters.add(new ClientCredentialsTokenGranter(tokenServices, clientDetails, requestFactory));
 			if (authenticationManager != null) {
 				tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager, tokenServices,
