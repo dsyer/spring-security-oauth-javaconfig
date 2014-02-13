@@ -46,6 +46,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurity
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * @author Rob Winch
@@ -99,6 +100,9 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
                 .and()
+            // TODO: put CSRF protection back into this endpoint
+            .csrf()
+                .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/**")).disable()
             .apply(new OAuth2ResourceServerConfigurer()).tokenStore(tokenStore)
                 .resourceId(SPARKLR_RESOURCE_ID);
     	// @formatter:on
