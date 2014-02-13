@@ -101,7 +101,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
                 .and()
-            // TODO: put CSRF protection back into this endpoint
+            // CSRF protection is awkward for machine clients
             .csrf()
                 .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/oauth/**")).disable()
             .apply(new OAuth2ResourceServerConfigurer()).tokenStore(tokenStore)
