@@ -147,6 +147,7 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
  			            .authorities("ROLE_CLIENT", "ROLE_TRUSTED_CLIENT")
  			            .scopes("read", "write", "trust")
+ 			            .accessTokenValiditySeconds(60)
 		 		    .and()
 	 		        .withClient("my-trusted-client-with-secret")
  			            .authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
