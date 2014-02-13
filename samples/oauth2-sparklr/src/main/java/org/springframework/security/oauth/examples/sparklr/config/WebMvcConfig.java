@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth.examples.sparklr.PhotoInfo;
 import org.springframework.security.oauth.examples.sparklr.PhotoService;
@@ -28,7 +29,12 @@ import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 @EnableWebMvc
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
-    @Bean
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+   @Bean
     public ContentNegotiatingViewResolver contentViewResolver() throws Exception {
         ContentNegotiationManagerFactoryBean contentNegotiationManager = new ContentNegotiationManagerFactoryBean();
         contentNegotiationManager.addMediaType("json", MediaType.APPLICATION_JSON);

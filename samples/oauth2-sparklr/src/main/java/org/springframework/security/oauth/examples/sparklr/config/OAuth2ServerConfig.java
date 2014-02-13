@@ -17,6 +17,7 @@ package org.springframework.security.oauth.examples.sparklr.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -124,6 +125,9 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 		@Autowired
 		private ClientDetailsService clientDetailsService;
 
+		@Value("${tonr.redirect:http://localhost:8080/tonr2/sparklr/redirect}")
+		private String tonrRedirectUri;
+
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
@@ -135,6 +139,14 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
 			 			.authorities("ROLE_CLIENT")
 			 			.scopes("read", "write")
 			 			.secret("secret")
+			 		.and()
+			 		.withClient("tonr-with-redirect")
+			 			.resourceIds(SPARKLR_RESOURCE_ID)
+			 			.authorizedGrantTypes("authorization_code", "implicit")
+			 			.authorities("ROLE_CLIENT")
+			 			.scopes("read", "write")
+			 			.secret("secret")
+			 			.redirectUris(tonrRedirectUri)
 			 		.and()
 		 		    .withClient("my-client-with-registered-redirect")
 	 			        .resourceIds(SPARKLR_RESOURCE_ID)
