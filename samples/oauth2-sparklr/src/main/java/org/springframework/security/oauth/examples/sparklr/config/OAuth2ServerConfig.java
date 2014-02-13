@@ -41,6 +41,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.TokenApprovalStore;
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.expression.OAuth2WebSecurityExpressionHandler;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.InMemoryTokenStore;
@@ -80,10 +81,10 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
         http
             .authorizeRequests()
                 .expressionHandler(new OAuth2WebSecurityExpressionHandler())
-                .antMatchers("/photos").hasAnyAuthority("ROLE_USER","SCOPE_TRUST")
-                .antMatchers("/photos/trusted/**").hasAnyAuthority("ROLE_CLIENT","SCOPE_TRUST")
-                .antMatchers("/photos/user/**").hasAnyAuthority("ROLE_USER","SCOPE_TRUST")
-                .antMatchers("/photos/**").hasAnyAuthority("ROLE_USER","SCOPE_READ")
+                .antMatchers("/photos").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('read')")
+                .antMatchers("/photos/trusted/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('trust')")
+                .antMatchers("/photos/user/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('trust')")
+                .antMatchers("/photos/**").access("#oauth2.denyOAuthClient() and hasRole('ROLE_USER') or #oauth2.hasScope('read')")
 	            .regexMatchers(HttpMethod.DELETE, "/oauth/users/([^/].*?)/tokens/.*")
 	                .access("#oauth2.clientHasRole('ROLE_CLIENT') and (hasRole('ROLE_USER') or #oauth2.isClient()) and #oauth2.hasScope('write')")
 	            .regexMatchers(HttpMethod.GET, "/oauth/users/.*")
@@ -95,6 +96,8 @@ public class OAuth2ServerConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/photos/**", "/oauth/users/**", "/oauth/clients/**")
                 .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+            .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler())
                 .and()
             .apply(new OAuth2ResourceServerConfigurer()).tokenStore(tokenStore)
                 .resourceId(SPARKLR_RESOURCE_ID);
