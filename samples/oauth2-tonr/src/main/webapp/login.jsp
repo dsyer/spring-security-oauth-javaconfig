@@ -59,11 +59,11 @@
 					<h2>Login</h2>
 				</legend>
 				<div class="form-group">
-					<label for="username">Username:</label> <input id="username"
+					<label for="j_username">Username:</label> <input id="j_username"
 						class="form-control" type='text' name='j_username' value="marissa" />
 				</div>
 				<div class="form-group">
-					<label for="password">Password:</label> <input id="password"
+					<label for="j_password">Password:</label> <input id="j_password"
 						class="form-control" type='text' name='j_password' value="wombat" />
 				</div>
 				<button class="btn btn-primary" type="submit">Login</button>
