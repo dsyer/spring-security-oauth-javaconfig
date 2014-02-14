@@ -62,8 +62,6 @@ public abstract class OAuth2AuthorizationServerConfigurerAdapter extends WebSecu
     }
 
     @Bean
-    @Lazy
-    @Scope(proxyMode=ScopedProxyMode.INTERFACES)
     public TokenEndpoint tokenEndpoint() throws Exception {
         TokenEndpoint tokenEndpoint = new TokenEndpoint();
         tokenEndpoint.setClientDetailsService(clientDetailsService());
